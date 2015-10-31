@@ -1,0 +1,5 @@
+
+FROM scratch
+ADD ./wily-1510311250.txz /
+ENV SHA 65833f57315b102e2eb98ea6d52bd842cbc6cb9bbb86a555c208f42eb8412182
+

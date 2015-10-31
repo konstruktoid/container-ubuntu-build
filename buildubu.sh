@@ -1,6 +1,6 @@
 #!/bin/sh
 
-release="trusty"
+release="wily"
 mirror="http://se.archive.ubuntu.com/ubuntu/"
 
 cmd="/usr/sbin/debootstrap"

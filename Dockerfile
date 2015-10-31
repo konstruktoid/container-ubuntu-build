@@ -1,5 +1,0 @@
-
-FROM scratch
-ADD ./trusty-1510222013.txz /
-ENV SHA 66770fa1c1731ced484457a4baa6a3694ceeb38ff541486e77db88e37f41a328
-

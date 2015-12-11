@@ -2,6 +2,13 @@
 
 release="$1"
 mirror="$2"
+location="$3"
+
+ID=$(id -u)
+if [ "x$ID" != "x0" ]; then
+  echo "root privileges required."
+  exit 1
+fi
 
 if [ -z "$release" -o -z "$mirror" ]; then
   echo "You have to define a release and mirror."
@@ -11,13 +18,17 @@ fi
 echo "Building release $release using mirror $mirror."
 
 cmd="/usr/sbin/debootstrap"
-dir="./$release"
 
-ID=$(id -u)
-if [ "x$ID" != "x0" ]; then
-  echo "root privileges required."
-  exit 1
+if [ -z "$location" ]; then
+  dir="/opt/buildarea/$release"
+  else
+  dir="$location/$release"
 fi
+
+cwd="$(dirname "$dir")"
+
+echo "Build directory is $dir."
+echo "Output directory is $cwd."
 
 if test -x $cmd; then
   echo "$cmd is installed. Moving on."
@@ -28,6 +39,7 @@ if test -x $cmd; then
 fi
 
 mkdir -p "$dir"
+cd "$cwd"
 
 if test -f /etc/apt/apt.conf.d/01proxy; then
   HTTPPROXY=$(grep 'Acquire::http::Proxy' /etc/apt/apt.conf.d/01proxy | sed 's/Acquire::http::Proxy /http_proxy=/g' | tr -d '";')
@@ -100,6 +112,7 @@ ADD ./$release-$date.txz /
 ENV SHA $SHA256
 "
 
-printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile
+printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"
+
 
 rm -rf "$dir"

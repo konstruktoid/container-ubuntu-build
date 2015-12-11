@@ -1,22 +1,31 @@
-## Ubuntu base image generator
-Run `sudo sh buildubu.sh` to generate a Ubuntu base image.
+## Debian and Ubuntu base image generator
+If you're not using Docker, run `sudo sh buildeb.sh` to generate a Debian or Ubuntu base image.  
 It will use `debootstrap`, create a tar-file, generate the `Dockerfile`
 and add a SHA256 checksum of the created tar-file to a `ENV` in the `Dockerfile`.
-`buildubu.sh` will also add `.git` and any previously generated tar-files
+`buildeb.sh` will also add `.git` and any previously generated tar-files
 to `.dockerignore`.
-  
-The generated `Ubuntu trusty` image will weigh in around 85M compared to the Docker hub library 
-version which is around 187M.
-  
+
 ### Build and verify
-`sudo sh buildubu.sh <release> <mirror>`  
+`sudo sh buildeb.sh <release> <mirror> <directory>`  
 
 For example:
 ```sh
-$ sudo sh buildubu.sh trusty http://se.archive.ubuntu.com/ubuntu/
-$ docker build -t ubuntu -f Dockerfile .
-$ docker run -t -i ubuntu bash
-```  
+$ sudo sh buildeb.sh wheezy ftp://ftp.se.debian.org/debian/ "$(pwd)/buildarea"
+$ docker build -t debian -f Dockerfile.wheezy .
+$ docker run -t -i debian cat /etc/debian_version
+```
+
+### Using Docker
+Debian:  
+```sh
+docker build -t debianbuild -f Dockerfile .
+docker run --privileged -v "$(pwd)"/buildarea:/opt/buildarea konstruktoid/debianbuild wheezy ftp://ftp.se.debian.org/debian/
+```
+
+Ubuntu:  
+```sh
+docker run --privileged -v "$(pwd)":/opt/buildarea konstruktoid/debianbuild trusty http://se.archive.ubuntu.com/ubuntu/
+```
 
 ### Recommended reading  
 [Before you initiate a “docker pull”](https://securityblog.redhat.com/2014/12/18/before-you-initiate-a-docker-pull/)  

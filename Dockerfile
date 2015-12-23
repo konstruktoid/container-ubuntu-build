@@ -1,5 +1,5 @@
 
 FROM scratch
-ADD ./trusty-1512121657.txz /
-ENV SHA e2bf94d76df6d34f0f32887f7eaa6f48a3cbc4af203cdb8af65e8bad36dbb286
+ADD ./trusty-1512231912.txz /
+ENV SHA aa9ecacf19501e8476eaf5697759acc79a2a5cbab4f175d83c6e8a26520f4332
 

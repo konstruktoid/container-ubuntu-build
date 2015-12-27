@@ -83,12 +83,12 @@ do
   chroot "$dir" userdel -r "$userlist"
 done
 
-rm -rf "$dir/dev" "$dir/proc"
-mkdir -p "$dir/dev" "$dir/proc"
+rm -rf $dir/dev $dir/proc
+mkdir -p $dir/dev $dir/proc
 
-rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"
-rm -rf "$dir/usr/share/doc" "$dir/usr/share/doc-base" \
-  "$dir/usr/share/man" "$dir/usr/share/locale" "$dir/usr/share/zoneinfo"
+rm -rf $dir/var/lib/apt/lists/* $dir/var/lib/dpkg/info/*
+rm -rf $dir/usr/share/doc $dir/usr/share/doc-base \
+  $dir/usr/share/man $dir/usr/share/locale $dir/usr/share/zoneinfo
 
 find "$dir" -user root -perm -2000 -exec chmod -s {} \;
 find "$dir" -user root -perm -4000 -exec chmod -s {} \;

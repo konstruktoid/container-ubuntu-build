@@ -103,7 +103,8 @@ fi
 
 date="$(date -u +%y%m%d%H%M)"
 
-LC_ALL=C tar --numeric-owner -caf "$release-$date.txz" -C "$dir" --transform='s,^./,,' .
+export XZ_OPT=-9e
+LC_ALL=C tar --numeric-owner -cJf "$release-$date.txz" -C "$dir" --transform='s,^./,,' .
 SHA256="$(openssl sha1 -sha256 "$release-$date.txz" | awk '{print $NF}')"
 
 dockerfile="

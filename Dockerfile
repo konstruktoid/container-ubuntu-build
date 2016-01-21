@@ -1,22 +1,5 @@
-FROM konstruktoid/ubuntu
 
-ENV BUILDAREA /opt/buildarea
+FROM scratch
+ADD ./xenial-1601211936.txz /
+ENV SHA 288edb15d5b649e3d592325023bda595fca2dbd4e4922d3304a5769ebae90130
 
-RUN \
-  apt-get update && \
-  apt-get -y upgrade && \
-  apt-get -y install debootstrap openssl sudo xz-utils && \
-  mkdir -p $BUILDAREA && \
-  apt-get clean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/* \
-    /usr/share/doc /usr/share/doc-base \
-    /usr/share/man /usr/share/locale /usr/share/zoneinfo
-
-COPY ./buildeb.sh /buildeb.sh
-
-WORKDIR /
-VOLUME $BUILDAREA
-
-ENTRYPOINT ["/buildeb.sh"]
-CMD []

@@ -18,6 +18,11 @@ $ docker run -t -i ubuntu /bin/bash
 ### Using Docker
 ```sh
 docker build -t ubuntubuild -f Dockerfile .
+docker run --privileged -v "$(pwd)":/opt/buildarea ubuntubuild trusty http://se.archive.ubuntu.com/ubuntu/
+```
+
+### Autobuild
+```sh
 docker run --privileged -v "$(pwd)":/opt/buildarea konstruktoid/ubuntubuild trusty http://se.archive.ubuntu.com/ubuntu/
 ```
 

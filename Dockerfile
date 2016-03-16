@@ -1,5 +1,5 @@
 
 FROM scratch
-ADD ./xenial-1603012209.txz /
-ENV SHA 4e3c57601dc54b83a8f576888a22f1fa61bfefeaf0a9e6bfc0280d5069070e55
+ADD ./xenial-1603162132.txz /
+ENV SHA 461a701ebf1db5c8ca364b6b72566ec48881075e70fef77eeb1bdc049bbcdb92
 

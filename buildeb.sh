@@ -111,6 +111,8 @@ dockerfile="
 FROM scratch
 ADD ./$release-$date.txz /
 ENV SHA $SHA256
+
+ONBUILD RUN apt-get update && apt-get -y upgrade
 "
 
 printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"

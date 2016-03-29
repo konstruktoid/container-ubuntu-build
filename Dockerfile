@@ -1,5 +1,7 @@
 
 FROM scratch
-ADD ./xenial-1603162132.txz /
-ENV SHA 461a701ebf1db5c8ca364b6b72566ec48881075e70fef77eeb1bdc049bbcdb92
+ADD ./xenial-1603292035.txz /
+ENV SHA ed0313228bdad1b4409f63ea13aee6ab1955079dd7f5a5079080ddf42996ba49
+
+ONBUILD RUN apt-get update && apt-get -y upgrade
 

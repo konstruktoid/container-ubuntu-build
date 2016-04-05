@@ -1,7 +1,10 @@
 
 FROM scratch
-ADD ./wily-1603292027.txz /
-ENV SHA fd39c0e5f7750ef17226481b4f36b36cc7981a7aad32e95d65f5efeb3b4542fb
+ADD ./wily-1604052253.txz /
+ENV SHA 2952e793b9baf03caedc757f48c2f6da917f28b372789f3b7c86a1866cb7a5d9
+
+ARG TERM=linux
+ARG DEBIAN_FRONTEND=noninteractive
 
 ONBUILD RUN apt-get update && apt-get -y upgrade
 

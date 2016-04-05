@@ -1,5 +1,8 @@
 FROM konstruktoid/ubuntu
 
+ARG TERM=linux
+ARG DEBIAN_FRONTEND=noninteractive
+
 ENV BUILDAREA /opt/buildarea
 
 RUN \

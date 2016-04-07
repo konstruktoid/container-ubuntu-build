@@ -77,7 +77,7 @@ chroot "$dir" apt-get update
 chroot "$dir" apt-get -y upgrade
 chroot "$dir" apt-get clean
 
-grep -v -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F ':' '{print $1}' | \
+grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F ':' '{print $1}' | \
  while IFS= read -r userlist
 do
   chroot "$dir" userdel -r "$userlist"

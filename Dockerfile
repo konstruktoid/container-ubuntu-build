@@ -1,7 +1,7 @@
 
 FROM scratch
-ADD ./xenial-1604052304.txz /
-ENV SHA 8a4201d1e59fa1e5089a5e6792a8c4192afed1de6270ae35fae2de59c59bdf4a
+ADD ./xenial-1604072003.txz /
+ENV SHA a237721a00cc738aac1805d320b47c178dd9b0e08b956b66eb74f4f0423c69e3
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

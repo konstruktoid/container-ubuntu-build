@@ -1,25 +1,10 @@
-FROM konstruktoid/ubuntu
+
+FROM scratch
+ADD ./yakkety-1605151819.txz /
+ENV SHA b185cb69cc8f1c8b8bd247a6f74d79447634ff2d9c1f99755b17e25cb8d7b126
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive
 
-ENV BUILDAREA /opt/buildarea
+ONBUILD RUN apt-get update && apt-get -y upgrade
 
-RUN \
-  apt-get update && \
-  apt-get -y upgrade && \
-  apt-get -y install debootstrap openssl sudo xz-utils && \
-  mkdir -p $BUILDAREA && \
-  apt-get clean && \
-  apt-get autoremove && \
-  rm -rf /var/lib/apt/lists/* \
-    /usr/share/doc /usr/share/doc-base \
-    /usr/share/man /usr/share/locale /usr/share/zoneinfo
-
-COPY ./buildeb.sh /buildeb.sh
-
-WORKDIR /
-VOLUME $BUILDAREA
-
-ENTRYPOINT ["/buildeb.sh"]
-CMD []

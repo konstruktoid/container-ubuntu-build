@@ -1,7 +1,7 @@
 
 FROM scratch
-ADD ./trusty-1609081952.txz /
-ENV SHA d57cbb13b23b44bb2efd57e8c4135cdf01d0fb21b86a503623b8e412ad1b5c9e
+ADD ./trusty-1611022058.txz /
+ENV SHA 129bc99de56aa732b28b572ec15d28a876db507a2cf405c2dc9068458d08739d
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

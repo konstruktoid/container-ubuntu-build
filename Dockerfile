@@ -1,4 +1,4 @@
-FROM konstruktoid/ubuntu
+FROM konstruktoid/ubuntu:bionic
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

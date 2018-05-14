@@ -10,7 +10,7 @@ if [ "x$ID" != "x0" ]; then
   exit 1
 fi
 
-if [ -z "$release" -o -z "$mirror" ]; then
+if [ -z "$release" ] || [ -z "$mirror" ]; then
   echo "You have to define a release and mirror."
   exit 1
 fi
@@ -21,7 +21,7 @@ cmd="/usr/sbin/debootstrap"
 
 if [ -z "$location" ]; then
   dir="/opt/buildarea/$release"
-  else
+else
   dir="$location/$release"
 fi
 
@@ -32,18 +32,19 @@ echo "Output directory is $cwd."
 
 if test -x $cmd; then
   echo "$cmd is installed. Moving on."
-  else
+else
   echo "$cmd not installed. Installing debootstrap."
   apt-get update
   apt-get install debootstrap
 fi
 
 mkdir -p "$dir"
-cd "$cwd"
+cd "$cwd" || exit 1
 
+# shellcheck disable=SC2163
 if test -f /etc/apt/apt.conf.d/01proxy; then
   HTTPPROXY=$(grep 'Acquire::http::Proxy' /etc/apt/apt.conf.d/01proxy | sed 's/Acquire::http::Proxy /http_proxy=/g' | tr -d '";')
-  export $HTTPPROXY
+  export "$HTTPPROXY"
 fi
 
 debootstrap --arch=amd64 --variant=minbase "$release" "$dir" "$mirror"
@@ -78,17 +79,16 @@ chroot "$dir" apt-get -y upgrade
 chroot "$dir" apt-get clean
 
 grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F ':' '{print $1}' | \
- while IFS= read -r userlist
-do
+ while IFS= read -r userlist; do
   chroot "$dir" userdel -r "$userlist"
 done
 
-rm -rf $dir/dev $dir/proc
-mkdir -p $dir/dev $dir/proc
+rm -rf "$dir/dev" "$dir/proc"
+mkdir -p "$dir/dev" "$dir/proc"
 
-rm -rf $dir/var/lib/apt/lists/* $dir/var/lib/dpkg/info/*
-rm -rf $dir/usr/share/doc $dir/usr/share/doc-base \
-  $dir/usr/share/man $dir/usr/share/locale $dir/usr/share/zoneinfo
+rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"
+rm -rf "$dir/usr/share/doc" "$dir/usr/share/doc-base" \
+  "$dir/usr/share/man" "$dir/usr/share/locale" "$dir/usr/share/zoneinfo"
 
 find "$dir" -user root -perm -2000 -exec chmod -s {} \;
 find "$dir" -user root -perm -4000 -exec chmod -s {} \;
@@ -119,6 +119,5 @@ ONBUILD RUN apt-get update && apt-get -y upgrade
 "
 
 printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"
-
 
 rm -rf "$dir"

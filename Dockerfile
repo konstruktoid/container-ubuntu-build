@@ -1,10 +1,10 @@
 
 FROM scratch
-ADD ./bionic-1801061858.txz /
-ENV SHA b50fe44861f8ed091aeacba407e94673e865b9cdef6876bfe106a38511d051e1
+ADD ./bionic-1805141435.txz /
+ENV SHA dcaa2f41681cfa1987c0c75a59844adf8153383c71175df62c44f8623e8c2243
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive
 
-ONBUILD RUN apt-get update && apt-get -y upgrade
+ONBUILD RUN apt-get update && apt-get --assume-yes upgrade
 

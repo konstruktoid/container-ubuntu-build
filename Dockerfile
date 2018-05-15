@@ -7,10 +7,11 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN \
   apt-get update && \
-  sh -c 'yes | apt-get -y upgrade' && \
-  apt-get -y install debootstrap openssl sudo xz-utils && \
+  sh -c 'yes | apt-get --assume-yes upgrade' && \
+  apt-get --assume-yes install debootstrap openssl sudo xz-utils && \
+  apt-get --assume-yes clean && \
+  apt-get --assume-yes autoremove && \
   mkdir -p $BUILDAREA && \
-  apt-get clean && \
   rm -rf /var/lib/apt/lists/* \
     /usr/share/doc /usr/share/doc-base \
     /usr/share/man /usr/share/locale /usr/share/zoneinfo

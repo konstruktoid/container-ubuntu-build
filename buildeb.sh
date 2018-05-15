@@ -35,7 +35,7 @@ if test -x $cmd; then
 else
   echo "$cmd not installed. Installing debootstrap."
   apt-get update
-  apt-get install debootstrap
+  apt-get --assume-yes install debootstrap
 fi
 
 mkdir -p "$dir"
@@ -75,8 +75,9 @@ chroot "$dir" dpkg-divert --local --rename --add /sbin/initctl
 chroot "$dir" ln -sf /bin/true sbin/initctl
 
 chroot "$dir" apt-get update
-chroot "$dir" apt-get -y upgrade
-chroot "$dir" apt-get clean
+chroot "$dir" apt-get --assume-yes upgrade
+chroot "$dir" apt-get --assume-yes clean
+chroot "$dir" apt-get --assume-yes autoremove
 
 grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F ':' '{print $1}' | \
  while IFS= read -r userlist; do
@@ -110,14 +111,21 @@ SHA256="$(openssl sha1 -sha256 "$release-$date.txz" | awk '{print $NF}')"
 dockerfile="
 FROM scratch
 ADD ./$release-$date.txz /
-ENV SHA $SHA256
+ENV SHA256 $SHA256
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive
 
-ONBUILD RUN apt-get update && apt-get --assume-yes upgrade
+ONBUILD RUN apt-get update && sh -c 'yes | apt-get --assume-yes upgrade'
 "
 
 printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"
+
+echo "# $release Docker image" > README.md
+{
+  echo
+  echo "FILE: $release-$date.txz"
+  echo "SHA256: $SHA256"
+} >> README.md
 
 rm -rf "$dir"

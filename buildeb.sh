@@ -47,9 +47,7 @@ if test -f /etc/apt/apt.conf.d/01proxy; then
   export "$HTTPPROXY"
 fi
 
-debootstrap --arch=amd64 --variant=minbase "$release" "$dir" "$mirror"
-
-if [ "$?" -ne "0" ]; then
+if ! debootstrap --arch=amd64 --variant=minbase "$release" "$dir" "$mirror"; then
   echo "Something broke. Try running the script again. Exiting."
   exit 1
 fi
@@ -84,7 +82,7 @@ grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F 
   chroot "$dir" userdel -r "$userlist"
 done
 
-rm -rf "$dir/dev" "$dir/proc"
+rm -rf "${dir:?}/dev" "${dir:?}/proc"
 mkdir -p "$dir/dev" "$dir/proc"
 
 rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"

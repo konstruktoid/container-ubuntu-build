@@ -9,20 +9,20 @@ It will use `debootstrap`, create a tar-file, generate the `Dockerfile` and add 
 
 For example:
 ```sh
-$ sudo sh buildeb.sh trusty http://se.archive.ubuntu.com/ubuntu/ "$(pwd)/buildarea"
-$ docker build -t ubuntu -f Dockerfile.trusty .
+$ sudo sh buildeb.sh bionic http://se.archive.ubuntu.com/ubuntu/ "$(pwd)/buildarea"
+$ docker build -t ubuntu -f Dockerfile.bionic .
 $ docker run -t -i ubuntu /bin/bash
 ```
 
 == Using Docker
 ```sh
 docker build --no-cache -t ubuntubuild -f Dockerfile .
-docker run --privileged -v "$(pwd)":/opt/buildarea ubuntubuild trusty http://se.archive.ubuntu.com/ubuntu/
+docker run --privileged -v "$(pwd)":/opt/buildarea ubuntubuild bionic http://se.archive.ubuntu.com/ubuntu/
 ```
 
 == Autobuild
 ```sh
-docker run --privileged -v "$(pwd)":/opt/buildarea konstruktoid/ubuntubuild trusty http://se.archive.ubuntu.com/ubuntu/
+docker run --privileged -v "$(pwd)":/opt/buildarea konstruktoid/ubuntubuild bionic http://se.archive.ubuntu.com/ubuntu/
 ```
 
 == Recommended reading

@@ -16,8 +16,8 @@ $ docker run -t -i ubuntu /bin/bash
 
 == Using Docker
 ```sh
-docker build --no-cache -t ubuntubuild -f Dockerfile .
-docker run --privileged -v "$(pwd)":/opt/buildarea ubuntubuild bionic http://se.archive.ubuntu.com/ubuntu/
+docker build --no-cache -t konstruktoid/ubuntubuild -f Dockerfile .
+docker run --privileged -v "$(pwd)":/opt/buildarea konstruktoid/ubuntubuild bionic http://se.archive.ubuntu.com/ubuntu/
 ```
 
 == Autobuild

@@ -141,8 +141,8 @@ printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"
 echo "# $release Docker image" > README.md
 {
   echo
-  echo "FILE: $release-$date.txz"
-  echo "SHA256: $SHA256"
+  echo "* FILE: $release-$date.txz"
+  echo "* SHA256: $SHA256"
 } >> README.md
 
 rm -rf "$dir"

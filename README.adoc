@@ -10,8 +10,8 @@ It will use `debootstrap`, create a tar-file, generate the `Dockerfile` and add 
 For example:
 ```sh
 $ sudo sh buildeb.sh bionic http://se.archive.ubuntu.com/ubuntu/ "$(pwd)/buildarea"
-$ docker build -t ubuntu -f Dockerfile.bionic .
-$ docker run -t -i ubuntu /bin/bash
+$ docker build -t konstruktoid/ubuntu -f Dockerfile.bionic .
+$ docker run -t -i konstruktoid/ubuntu /bin/bash
 ```
 
 == Using Docker

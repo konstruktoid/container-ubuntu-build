@@ -83,7 +83,8 @@ chroot "$dir" ln -sf /bin/true sbin/initctl
   echo 'Acquire::Languages "none";'
   echo 'Apt::AutoRemove::SuggestsImportant "false";'
   echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'
-  echo 'Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";'
+  echo 'Dir::Cache::pkgcache "";'
+  echo 'Dir::Cache::srcpkgcache "";'
   echo 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
 } > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
 
@@ -142,6 +143,7 @@ echo "# $release Docker image" > README.md
 {
   echo
   echo "* FILE: $release-$date.txz"
+  echo "* SIZE: $("$release"-"$date".txz | awk '{print $1}')"
   echo "* SHA256: $SHA256"
 } >> README.md
 

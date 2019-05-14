@@ -72,6 +72,21 @@ chmod +x "$dir/usr/sbin/policy-rc.d"
 chroot "$dir" dpkg-divert --local --rename --add /sbin/initctl
 chroot "$dir" ln -sf /bin/true sbin/initctl
 
+{
+  echo '# https://github.com/konstruktoid/hardening/blob/master/scripts/10_aptget'
+  echo '# https://github.com/tianon/docker-brew-ubuntu-core/blob/5a80061eeed1a4c395066d922bf7f1a0ea79e73c/bionic/Dockerfile#L21-L33'
+  echo 'APT::Get::AutomaticRemove "true";'
+  echo 'APT::Install-Recommends "false";'
+  echo 'APT::Install-Suggests "false";'
+  echo 'APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'
+  echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";'
+  echo 'Acquire::Languages "none";'
+  echo 'Apt::AutoRemove::SuggestsImportant "false";'
+  echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'
+  echo 'Dir::Cache::pkgcache ""; Dir::Cache::srcpkgcache "";'
+  echo 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
+} > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
+
 chroot "$dir" apt-get update
 chroot "$dir" apt-get --assume-yes upgrade
 chroot "$dir" apt-get --assume-yes --purge remove curl libgssapi libgssapi* libldap* libsasl2* libssl libssl* openssl

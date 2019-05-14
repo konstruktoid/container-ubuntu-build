@@ -99,6 +99,8 @@ grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F 
   chroot "$dir" userdel -r "$userlist"
 done
 
+chroot "$dir" usermod -L root
+
 rm -rf "${dir:?}/dev" "${dir:?}/proc"
 mkdir -p "$dir/dev" "$dir/proc"
 

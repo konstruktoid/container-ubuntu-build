@@ -90,7 +90,11 @@ chroot "$dir" ln -sf /bin/true sbin/initctl
 
 chroot "$dir" apt-get update
 chroot "$dir" apt-get --assume-yes upgrade
-chroot "$dir" apt-get --assume-yes --purge remove curl libgssapi libgssapi* libldap* libsasl2* libssl libssl* openssl
+
+for p in curl libgssapi libgssapi* libldap* libsasl2* libssl libssl* openssl procps; do
+  chroot "$dir" apt-get --assume-yes --purge remove "$p"
+done
+
 chroot "$dir" apt-get --assume-yes clean
 chroot "$dir" apt-get --assume-yes autoclean
 chroot "$dir" apt-get --assume-yes autoremove

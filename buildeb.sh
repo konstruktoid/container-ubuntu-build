@@ -147,7 +147,7 @@ echo "# $release Docker image" > README.md
 {
   echo
   echo "* FILE: $release-$date.txz"
-  echo "* SIZE: $("$release"-"$date".txz | awk '{print $1}')"
+  echo "* SIZE: $(du -h "$release"-"$date".txz | awk '{print $1}')"
   echo "* SHA256: $SHA256"
 } >> README.md
 

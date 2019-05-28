@@ -1,4 +1,5 @@
 # cosmic Docker image
 
-FILE: cosmic-1905102020.txz
-SHA256: 9d6c9858628e14fc914f8c38a3275c8b9b06d28ab0a50d7baaddf7dc227b125e
+* FILE: cosmic-1905281839.txz
+* SIZE: 16M
+* SHA256: eeb38f3bdd0c7d96799856ceab01d88665ab254f7352e1a970e550f39057523f

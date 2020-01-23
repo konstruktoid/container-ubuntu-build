@@ -113,6 +113,14 @@ rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"
 rm -rf "$dir/usr/share/doc" "$dir/usr/share/doc-base" \
   "$dir/usr/share/man" "$dir/usr/share/locale" "$dir/usr/share/zoneinfo"
 
+if echo "$mirror" | grep -iq ubuntu; then
+  echo "deb $mirror $release main" > "$dir/etc/apt/sources.list"
+elif echo "$mirror" | grep -iq debian; then
+  echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list"
+else
+  echo "$mirror doesn't seem to include ubuntu or debian?"
+fi
+
 find "$dir" -user root -perm -2000 -exec chmod -s {} \;
 find "$dir" -user root -perm -4000 -exec chmod -s {} \;
 

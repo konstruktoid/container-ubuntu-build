@@ -1,0 +1,5 @@
+# eoan Docker image
+
+* FILE: eoan-2001231215.txz
+* SIZE: 16M
+* SHA256: 9ebf68bf9325f7c52e819850e4689a97304f5b92aca436268c88e580874ae39b

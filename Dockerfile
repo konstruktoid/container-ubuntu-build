@@ -1,25 +1,11 @@
-FROM konstruktoid/ubuntu:bionic
 
-ENV BUILDAREA /opt/buildarea
+FROM scratch
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
+ADD ./eoan-2001231215.txz /
+ENV SHA256 9ebf68bf9325f7c52e819850e4689a97304f5b92aca436268c88e580874ae39b
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN \
-  apt-get update && \
-  sh -c 'yes | apt-get --assume-yes upgrade' && \
-  apt-get --assume-yes install debootstrap openssl sudo xz-utils && \
-  apt-get --assume-yes clean && \
-  apt-get --assume-yes autoremove && \
-  mkdir -p $BUILDAREA && \
-  rm -rf /var/lib/apt/lists/* \
-    /usr/share/doc /usr/share/doc-base \
-    /usr/share/man /usr/share/locale /usr/share/zoneinfo
+ONBUILD RUN apt-get update && sh -c 'yes | apt-get --assume-yes upgrade'
 
-COPY ./buildeb.sh /buildeb.sh
-
-WORKDIR /
-VOLUME $BUILDAREA
-
-ENTRYPOINT ["/buildeb.sh"]
-CMD []

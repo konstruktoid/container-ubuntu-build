@@ -1,7 +1,8 @@
 
 FROM scratch
-ADD ./bionic-1905272155.txz /
-ENV SHA256 ef5c16e2761d10b1c69e8e8e6d8885696465a39406292fbdc2cbefbccb328813
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
+ADD ./bionic-2001231153.txz /
+ENV SHA256 6756fa583782fcf7c712739ab7c8853d6a33a139fec17818933c100af534899d
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

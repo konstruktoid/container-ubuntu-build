@@ -132,6 +132,7 @@ SHA256="$(openssl sha1 -sha256 "$release-$date.txz" | awk '{print $NF}')"
 
 dockerfile="
 FROM scratch
+LABEL maintainer="Thomas Sjögren <konstruktoid@users.noreply.github.com>"
 ADD ./$release-$date.txz /
 ENV SHA256 $SHA256
 

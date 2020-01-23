@@ -1,7 +1,8 @@
 
 FROM scratch
-ADD ./disco-1905281831.txz /
-ENV SHA256 b61f8e16822907c0fbe36e71110584e174474686242697f1aebd0a2bab53c08b
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
+ADD ./disco-2001231205.txz /
+ENV SHA256 2bdd40cd316d0abe9c8c72464b11411c956e2f259870b22d006e5ec5de5bd130
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

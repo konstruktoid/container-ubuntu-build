@@ -1,7 +1,8 @@
 
 FROM scratch
-ADD ./cosmic-1905281839.txz /
-ENV SHA256 eeb38f3bdd0c7d96799856ceab01d88665ab254f7352e1a970e550f39057523f
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
+ADD ./cosmic-2001242302.txz /
+ENV SHA256 e9b5cb3d63b0dd425411a7c4fd1b9e02891bdf6ac268820827856d24bd3d5707
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

@@ -1,4 +1,6 @@
-FROM konstruktoid/ubuntu:bionic
+FROM konstruktoid/ubuntu:eoan
+
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
 
 ENV BUILDAREA /opt/buildarea
 

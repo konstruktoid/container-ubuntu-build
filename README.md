@@ -1,4 +1,5 @@
 # trusty Docker image
 
-FILE: trusty-1905102034.txz
-SHA256: d9d5aa835aed4227dd216d8a3b65e7d50029a560c9440a5506520f52a9dc8693
+* FILE: trusty-2001242353.txz
+* SIZE: 17M
+* SHA256: d9aeb7aef2c478c0c5c6b743afbbda3c413595dda8bea331c78ed572ef93c0d4

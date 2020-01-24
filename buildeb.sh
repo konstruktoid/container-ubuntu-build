@@ -88,6 +88,16 @@ chroot "$dir" ln -sf /bin/true sbin/initctl
   echo 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
 } > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
 
+if echo "$mirror" | grep -iq ubuntu; then
+  echo "deb $mirror $release main multiverse" > "$dir/etc/apt/sources.list"
+  echo "deb $mirror $release-security main multiverse" >> "$dir/etc/apt/sources.list"
+elif echo "$mirror" | grep -iq debian; then
+  echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list"
+  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" >> /etc/apt/sources.list
+else
+  echo "$mirror doesn't seem to include ubuntu or debian?"
+fi
+
 chroot "$dir" apt-get update
 chroot "$dir" apt-get --assume-yes upgrade
 
@@ -112,14 +122,6 @@ mkdir -p "$dir/dev" "$dir/proc"
 rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"
 rm -rf "$dir/usr/share/doc" "$dir/usr/share/doc-base" \
   "$dir/usr/share/man" "$dir/usr/share/locale" "$dir/usr/share/zoneinfo"
-
-if echo "$mirror" | grep -iq ubuntu; then
-  echo "deb $mirror $release main" > "$dir/etc/apt/sources.list"
-elif echo "$mirror" | grep -iq debian; then
-  echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list"
-else
-  echo "$mirror doesn't seem to include ubuntu or debian?"
-fi
 
 find "$dir" -user root -perm -2000 -exec chmod -s {} \;
 find "$dir" -user root -perm -4000 -exec chmod -s {} \;

@@ -1,4 +1,5 @@
 # xenial Docker image
 
-FILE: xenial-1905102026.txz
-SHA256: 0a0f9496e98a0a3e281c25f5188be1ef50c7b3897de599dc82244255b2bbf07e
+* FILE: xenial-2001250013.txz
+* SIZE: 21M
+* SHA256: 5e51962415d66b9456368bb810c0bb5e4f200bcfa564e0ecd3815ae0b4c0ada4

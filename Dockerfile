@@ -1,7 +1,8 @@
 
 FROM scratch
-ADD ./xenial-1905102026.txz /
-ENV SHA256 0a0f9496e98a0a3e281c25f5188be1ef50c7b3897de599dc82244255b2bbf07e
+LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
+ADD ./xenial-2001250013.txz /
+ENV SHA256 5e51962415d66b9456368bb810c0bb5e4f200bcfa564e0ecd3815ae0b4c0ada4
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

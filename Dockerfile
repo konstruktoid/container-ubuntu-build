@@ -1,8 +1,8 @@
 
 FROM scratch
 LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
-ADD ./disco-2001242318.txz /
-ENV SHA256 e860a17c42017425a2c92e258d4a0735183a45d531aea861e1bb72242811a546
+ADD ./disco-2001271004.txz /
+ENV SHA256 db003561114f0e99672d7fd2deb632e7155febae8c0d37b7e53bb22b00c684aa
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

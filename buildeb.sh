@@ -88,10 +88,10 @@ chroot "$dir" ln -sf /bin/true sbin/initctl
   echo 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
 } > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
 
-if echo "$mirror" | grep -iq ubuntu; then
+if grep -qi 'ubuntu' "$dir/etc/os-release"; then
   echo "deb $mirror $release main multiverse" > "$dir/etc/apt/sources.list"
   echo "deb $mirror $release-security main multiverse" >> "$dir/etc/apt/sources.list"
-elif echo "$mirror" | grep -iq debian; then
+elif grep -qi 'debian' "$dir/etc/os-release"; then
   echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list"
   echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" >> "$dir/etc/apt/sources.list"
 else

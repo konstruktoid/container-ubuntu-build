@@ -93,7 +93,7 @@ if echo "$mirror" | grep -iq ubuntu; then
   echo "deb $mirror $release-security main multiverse" >> "$dir/etc/apt/sources.list"
 elif echo "$mirror" | grep -iq debian; then
   echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list"
-  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" >> /etc/apt/sources.list
+  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" >> "$dir/etc/apt/sources.list"
 else
   echo "$mirror doesn't seem to include ubuntu or debian?"
 fi

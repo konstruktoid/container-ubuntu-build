@@ -1,5 +1,5 @@
 # bionic Docker image
 
-* FILE: bionic-2001242243.txz
-* SIZE: 17M
-* SHA256: 8101965aaaa9f7275dcf04f48dceab6e1228a9eed952c0082f8491357e375bfa
+* FILE: bionic-2001270952.txz
+* SIZE: 16M
+* SHA256: 54ea0ffcf6fab00c9f191d768264398c6e7d7294d4e1ecd0c8ac5ebce49c35cb

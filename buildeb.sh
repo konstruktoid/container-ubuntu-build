@@ -89,13 +89,11 @@ chroot "$dir" ln -sf /bin/true sbin/initctl
 } > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
 
 if grep -qi 'ubuntu' "$dir/etc/os-release"; then
-  echo "deb $mirror $release main multiverse" > "$dir/etc/apt/sources.list.d/99-builddeb.list"
-  echo "deb $mirror $release-security main multiverse" >> "$dir/etc/apt/sources.list.d/99-builddeb.list"
+  echo "deb $mirror $release-security main multiverse" > "$dir/etc/apt/sources.list.d/99-security.list"
 elif grep -qi 'debian' "$dir/etc/os-release"; then
-  echo "deb $mirror $release main contrib non-free" > "$dir/etc/apt/sources.list.d/99-builddeb.list"
-  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" >> "$dir/etc/apt/sources.list.d/99-builddeb.list"
+  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" > "$dir/etc/apt/sources.list.d/99-security.list"
 else
-  echo "$mirror doesn't seem to include ubuntu or debian?"
+  echo "/etc/os-release doesn't seem to include ubuntu or debian?"
 fi
 
 chroot "$dir" apt-get update

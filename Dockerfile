@@ -1,8 +1,8 @@
 
 FROM scratch
 LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
-ADD ./xenial-2001250013.txz /
-ENV SHA256 5e51962415d66b9456368bb810c0bb5e4f200bcfa564e0ecd3815ae0b4c0ada4
+ADD ./xenial-2002131259.txz /
+ENV SHA256 a9f0c1c674801837e749c39d65e0c031bf8f3c971264981af57486d85882eec8
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

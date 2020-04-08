@@ -97,7 +97,7 @@ else
 fi
 
 chroot "$dir" apt-get update
-chroot "$dir" apt-get --assume-yes upgrade
+chroot "$dir" apt-get --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --with-new-pkgs upgrade
 
 for p in curl libgssapi libgssapi* libldap* libsasl2* libssl libssl* openssl procps; do
   chroot "$dir" apt-get --assume-yes --purge remove "$p"

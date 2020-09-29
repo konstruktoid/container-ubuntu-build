@@ -1,8 +1,8 @@
 
 FROM scratch
 LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
-ADD ./bionic-2009021546.txz /
-ENV SHA256 e0cf3848c3f8e1ff9d53007f178a69126f0037919e34073469c5cd1bb1540433
+ADD ./bionic-2009291448.txz /
+ENV SHA256 e746164bbf43de6f28fbe75a3a470d185c911dce2251a02c3f1719feb13a78b9
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

@@ -1,5 +1,5 @@
 # focal Docker image
 
-* FILE: focal-2009291503.txz
+* FILE: focal-2012172215.txz
 * SIZE: 17M
-* SHA256: 3267df36b8fb5f423a6a9c98cd1e28e884fcd818d73e470cbae9cfe0136fc762
+* SHA256: 12a52a2119e412a673c558b7dc18f58faadab70f5723e70112c69d9d14352d4a

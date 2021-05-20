@@ -1,8 +1,8 @@
 
 FROM scratch
 LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
-ADD ./focal-2012172215.txz /
-ENV SHA256 12a52a2119e412a673c558b7dc18f58faadab70f5723e70112c69d9d14352d4a
+ADD ./focal-2105200907.txz /
+ENV SHA256 c93bde0884e5fe23e9307ff64497ad8be3e4e5f7f366321509f8de1c4c99ad76
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive

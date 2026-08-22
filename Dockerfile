@@ -13,6 +13,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # sudo and openssl are gone: buildeb.sh already requires root and now uses
 # sha256sum instead of openssl for the tarball checksum.
+# Packages are deliberately unpinned: this image exists to carry the newest
+# patched debootstrap and keyrings. See "Reproducibility" in README.md.
+# hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get --assume-yes upgrade && \
     apt-get --assume-yes install --no-install-recommends \
@@ -33,5 +36,9 @@ COPY --chmod=0755 ./buildeb.sh /buildeb.sh
 WORKDIR $BUILDAREA
 VOLUME ["/opt/buildarea"]
 
+# No USER instruction on purpose. debootstrap has to mknod device nodes, mount
+# /proc and chroot into the target, and buildeb.sh refuses to start as anything
+# but uid 0. The container is a build tool that is run and discarded, not a
+# service. See "Privileges" in README.md.
 ENTRYPOINT ["/buildeb.sh"]
 CMD []

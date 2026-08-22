@@ -17,7 +17,12 @@ commit you saw it on.
 
 ## Scope
 
-Vulnerabilities in the packages this image installs belong upstream, with the
-distribution or the project itself. What is in scope here is how this repository
-builds and configures the image: the `Dockerfile`, the shipped configuration,
-the entry point scripts and the GitHub Actions workflows.
+How this repository builds and configures the image is in scope: the
+`Dockerfile`, the shipped configuration, the entry point scripts and the
+GitHub Actions workflows.
+
+A vulnerability in a package the image installs is in scope as a report as
+well, even when the fix itself belongs to the distribution or to the upstream
+project. The published image carries that package, and when the image is
+rebuilt is decided here. Reports like that are triaged here and coordinated
+upstream where the fix has to be made.

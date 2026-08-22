@@ -1,11 +1,8 @@
 ---
-ignored:
-  # These images exist to track the newest patched package set, so pinning
-  # every package to a version would defeat their purpose. The base image is
-  # pinned by digest instead, and Renovate keeps that digest current.
-  - DL3008
-  - DL3018
-  # Users are referenced by name on purpose; the accounts are created by the
-  # distribution packages inside the image.
-  - DL3066
+# Nothing below "warning" fails a build. DL3066 (non-numeric user-id) stays
+# informational: the runtime accounts are created by the distribution packages
+# inside the image, so they are referenced by name on purpose.
+#
+# Package pinning (DL3008, DL3018) is ignored per instruction in the Dockerfile
+# rather than globally, so a new unpinned install elsewhere is still reported.
 failure-threshold: warning

@@ -1,0 +1,45 @@
+---
+# Replaces renovate.json. Dependabot covers the two ecosystems these images
+# actually pin: the SHA-pinned actions in .github/workflows/ and the
+# digest-pinned base image in the Dockerfile. It rewrites the version comment
+# next to a pinned SHA, so pinning does not freeze the repository on an old
+# release. Dependabot has no automerge of its own, so every update goes
+# through a pull request and the container build that runs on it.
+#
+# The hook revisions in .pre-commit-config.yaml are not covered here; they are
+# updated with `pre-commit autoupdate`.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Most malicious releases are found and yanked within days, so a week of
+    # delay absorbs a large share of that risk at very little cost.
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+    # One pull request for all action bumps: every action here is pinned by
+    # SHA, so the alternative is a separate branch per action every week.
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope

@@ -2,10 +2,6 @@ name: Container build
 
 on:
   pull_request:
-    paths:
-      - 'Dockerfile'
-      - '.dockerignore'
-      - '.github/workflows/containerbuild.yml'
   schedule:
     - cron: "0 5 * * */2"
   workflow_dispatch:

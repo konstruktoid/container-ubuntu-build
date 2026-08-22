@@ -30,6 +30,12 @@ else
   dir="${location}/${release}"
 fi
 
+# Resolve the build directory before anything changes the working directory.
+# A relative [directory] argument would otherwise be re-resolved against
+# ${cwd} after the cd below, and the tar and .dockerignore steps would look
+# for it inside the output directory instead of next to it.
+mkdir -p "${dir}"
+dir="$(CDPATH='' cd "${dir}" && pwd)"
 cwd="$(dirname "${dir}")"
 
 echo "Build directory is ${dir}."
@@ -43,7 +49,6 @@ else
   apt-get --assume-yes install debootstrap
 fi
 
-mkdir -p "${dir}"
 cd "${cwd}"
 
 # apt inside the chroot needs a working /dev/null. On a filesystem mounted
@@ -163,16 +168,22 @@ rm -rf "${dir:?}/usr/share/doc" "${dir:?}/usr/share/doc-base" \
 find "${dir}" -user root -perm -2000 -exec chmod -s {} \;
 find "${dir}" -user root -perm -4000 -exec chmod -s {} \;
 
+date="$(date -u +%y%m%d%H%M)"
+tarball="${release}-${date}.txz"
+
+# Previously generated tarballs are kept out of the build context, but not the
+# one this run is about to write: a second build of the same release in the
+# same UTC minute would otherwise find the existing file, ignore it, and the
+# generated "ADD ./${tarball} /" would have nothing to add.
 {
   echo '.git'
   for t in ./*.txz; do
     [ -e "${t}" ] || continue
-    echo "${t}"
+    if [ "${t}" != "./${tarball}" ]; then
+      echo "${t}"
+    fi
   done
 } > .dockerignore
-
-date="$(date -u +%y%m%d%H%M)"
-tarball="${release}-${date}.txz"
 
 XZ_OPT=-9e
 export XZ_OPT
@@ -199,14 +210,19 @@ ARG DEBIAN_FRONTEND=noninteractive
 ONBUILD RUN apt-get update && apt-get --assume-yes upgrade
 DOCKERFILE
 
+# Named after the release rather than README.md: the output directory is often
+# a checkout of this repository, and a plain README.md would overwrite its own
+# documentation.
+readme="README.${release}.md"
+
 {
   echo "# ${release} Docker image"
   echo
   echo "* FILE: ${tarball}"
   echo "* SIZE: $(du -h "${tarball}" | awk '{print $1}')"
   echo "* SHA256: ${sha256}"
-} > README.md
+} > "${readme}"
 
 rm -rf "${dir:?}"
 
-echo "Wrote ${tarball}, Dockerfile.${release} and README.md to ${cwd}."
+echo "Wrote ${tarball}, Dockerfile.${release} and ${readme} to ${cwd}."

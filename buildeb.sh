@@ -1,163 +1,228 @@
 #!/bin/sh
+# Generate a minimal Debian or Ubuntu base image tarball with debootstrap,
+# together with a Dockerfile and a README describing it.
+#
+# Usage: buildeb.sh <release> <mirror> [directory]
 
-release="$1"
-mirror="$2"
-location="$3"
+set -eu
 
-ID=$(id -u)
-if [ "x$ID" != "x0" ]; then
-  echo "root privileges required."
+release="${1:-}"
+mirror="${2:-}"
+location="${3:-}"
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "root privileges required." >&2
   exit 1
 fi
 
-if [ -z "$release" ] || [ -z "$mirror" ]; then
-  echo "You have to define a release and mirror."
+if [ -z "${release}" ] || [ -z "${mirror}" ]; then
+  echo "Usage: $0 <release> <mirror> [directory]" >&2
   exit 1
 fi
 
-echo "Building release $release using mirror $mirror."
+echo "Building release ${release} using mirror ${mirror}."
 
-cmd="/usr/sbin/debootstrap"
+cmd='/usr/sbin/debootstrap'
 
-if [ -z "$location" ]; then
-  dir="/opt/buildarea/$release"
+if [ -z "${location}" ]; then
+  dir="/opt/buildarea/${release}"
 else
-  dir="$location/$release"
+  dir="${location}/${release}"
 fi
 
-cwd="$(dirname "$dir")"
+# Resolve the build directory before anything changes the working directory.
+# A relative [directory] argument would otherwise be re-resolved against
+# ${cwd} after the cd below, and the tar and .dockerignore steps would look
+# for it inside the output directory instead of next to it.
+mkdir -p "${dir}"
+dir="$(CDPATH='' cd "${dir}" && pwd)"
+cwd="$(dirname "${dir}")"
 
-echo "Build directory is $dir."
-echo "Output directory is $cwd."
+echo "Build directory is ${dir}."
+echo "Output directory is ${cwd}."
 
-if test -x $cmd; then
-  echo "$cmd is installed. Moving on."
+if [ -x "${cmd}" ]; then
+  echo "${cmd} is installed. Moving on."
 else
-  echo "$cmd not installed. Installing debootstrap."
+  echo "${cmd} not installed. Installing debootstrap."
   apt-get update
   apt-get --assume-yes install debootstrap
 fi
 
-mkdir -p "$dir"
-cd "$cwd" || exit 1
+cd "${cwd}"
 
-# shellcheck disable=SC2163
-if test -f /etc/apt/apt.conf.d/01proxy; then
-  HTTPPROXY=$(grep 'Acquire::http::Proxy' /etc/apt/apt.conf.d/01proxy | sed 's/Acquire::http::Proxy /http_proxy=/g' | tr -d '";')
-  export "$HTTPPROXY"
-fi
-
-if ! debootstrap --arch=amd64 --variant=minbase "$release" "$dir" "$mirror"; then
-  echo "Something broke. Try running the script again. Exiting."
+# apt inside the chroot needs a working /dev/null. On a filesystem mounted
+# nodev - /tmp very often is - the device node can be created but not opened,
+# and apt-key reports that as "gpgv, gpgv2 or gpgv1 required for verification,
+# but neither seems installed", which sends you looking for a missing package
+# that is in fact installed. Fail here with the real reason instead.
+if mknod "${dir}/.devnodetest" c 1 3 2> /dev/null &&
+  [ -c "${dir}/.devnodetest" ] &&
+  (: < "${dir}/.devnodetest") 2> /dev/null; then
+  rm -f "${dir}/.devnodetest"
+else
+  rm -f "${dir}/.devnodetest"
+  echo "${cwd} cannot hold usable device nodes; is it on a nodev mount?" >&2
+  echo "Pick a build directory on a filesystem mounted without nodev." >&2
   exit 1
 fi
 
-hosts="
+# Reuse an apt-cacher-ng proxy if one is configured on the host.
+if [ -f /etc/apt/apt.conf.d/01proxy ]; then
+  http_proxy="$(sed -n 's/.*Acquire::http::Proxy *"\([^"]*\)".*/\1/p' \
+    /etc/apt/apt.conf.d/01proxy | head -1)"
+  if [ -n "${http_proxy}" ]; then
+    export http_proxy
+    echo "Using http proxy ${http_proxy}."
+  else
+    unset http_proxy
+  fi
+fi
+
+if ! debootstrap --arch=amd64 --variant=minbase "${release}" "${dir}" "${mirror}"; then
+  echo "debootstrap failed. Exiting." >&2
+  exit 1
+fi
+
+# The trailing '$' characters in earlier revisions of this heredoc ended up
+# verbatim in /etc/hosts.
+cat > "${dir}/etc/hosts" <<'HOSTS'
 127.0.0.1 localhost
-::1 localhost ip6-localhost ip6-loopback$
-ff02::1 ip6-allnodes$
-ff02::2 ip6-allrouters$
-"
+::1 localhost ip6-localhost ip6-loopback
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+HOSTS
 
-printf '%s\n' "$hosts" | sed 's/^ //g' > "$dir/etc/hosts"
-
-policy='
+cat > "${dir}/usr/sbin/policy-rc.d" <<'POLICY'
 #!/bin/sh
 exit 101
-'
+POLICY
+chmod 0755 "${dir}/usr/sbin/policy-rc.d"
 
-printf '%s\n' "$policy" | sudo tee "$dir/usr/sbin/policy-rc.d" > /dev/null
-chmod +x "$dir/usr/sbin/policy-rc.d"
+chroot "${dir}" dpkg-divert --local --rename --add /sbin/initctl
+chroot "${dir}" ln -sf /bin/true /sbin/initctl
 
-chroot "$dir" dpkg-divert --local --rename --add /sbin/initctl
-chroot "$dir" ln -sf /bin/true sbin/initctl
+cat > "${dir}/etc/apt/apt.conf.d/99-docker-builddeb" <<'APTCONF'
+# https://github.com/konstruktoid/hardening/blob/master/scripts/10_aptget
+# https://github.com/tianon/docker-brew-ubuntu-core/blob/5a80061eeed1a4c395066d922bf7f1a0ea79e73c/bionic/Dockerfile#L21-L33
+APT::Get::AutomaticRemove "true";
+APT::Install-Recommends "false";
+APT::Install-Suggests "false";
+APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };
+Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";
+Acquire::Languages "none";
+Apt::AutoRemove::SuggestsImportant "false";
+DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };
+Dir::Cache::pkgcache "";
+Dir::Cache::srcpkgcache "";
+Unattended-Upgrade::Remove-Unused-Dependencies "true";
+APTCONF
 
-{
-  echo '# https://github.com/konstruktoid/hardening/blob/master/scripts/10_aptget'
-  echo '# https://github.com/tianon/docker-brew-ubuntu-core/blob/5a80061eeed1a4c395066d922bf7f1a0ea79e73c/bionic/Dockerfile#L21-L33'
-  echo 'APT::Get::AutomaticRemove "true";'
-  echo 'APT::Install-Recommends "false";'
-  echo 'APT::Install-Suggests "false";'
-  echo 'APT::Update::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'
-  echo 'Acquire::GzipIndexes "true"; Acquire::CompressionTypes::Order:: "gz";'
-  echo 'Acquire::Languages "none";'
-  echo 'Apt::AutoRemove::SuggestsImportant "false";'
-  echo 'DPkg::Post-Invoke { "rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true"; };'
-  echo 'Dir::Cache::pkgcache "";'
-  echo 'Dir::Cache::srcpkgcache "";'
-  echo 'Unattended-Upgrade::Remove-Unused-Dependencies "true";'
-} > "$dir/etc/apt/apt.conf.d/99-docker-builddeb"
-
-if grep -qi 'ubuntu' "$dir/etc/os-release"; then
-  echo "deb $mirror $release-security main multiverse" > "$dir/etc/apt/sources.list.d/99-security.list"
-elif grep -qi 'debian' "$dir/etc/os-release"; then
-  echo "deb http://security.debian.org/debian-security $release/updates main contrib non-free" > "$dir/etc/apt/sources.list.d/99-security.list"
+# Debian moved from "<release>/updates" to "<release>-security" in bullseye.
+if grep -qi 'ubuntu' "${dir}/etc/os-release"; then
+  echo "deb ${mirror} ${release}-security main multiverse" \
+    > "${dir}/etc/apt/sources.list.d/99-security.list"
+elif grep -qi 'debian' "${dir}/etc/os-release"; then
+  echo "deb http://security.debian.org/debian-security ${release}-security main contrib non-free non-free-firmware" \
+    > "${dir}/etc/apt/sources.list.d/99-security.list"
 else
-  echo "/etc/os-release doesn't seem to include ubuntu or debian?"
+  echo "/etc/os-release doesn't seem to include ubuntu or debian?" >&2
 fi
 
-chroot "$dir" apt-get update
-chroot "$dir" apt-get --assume-yes -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" --with-new-pkgs upgrade
+chroot "${dir}" apt-get update
+chroot "${dir}" apt-get --assume-yes \
+  -o Dpkg::Options::="--force-confdef" \
+  -o Dpkg::Options::="--force-confold" \
+  --with-new-pkgs upgrade
 
-for p in curl libgssapi libgssapi* libldap* libsasl2* libssl libssl* openssl procps; do
-  chroot "$dir" apt-get --assume-yes --purge remove "$p"
+# Trim the attack surface. Packages that are absent make apt-get exit non-zero,
+# which under set -e would abort the whole build, so failures are tolerated
+# individually here.
+for p in curl libgssapi3-heimdal libldap-common libldap-2.5-0 libsasl2-2 \
+  libsasl2-modules libsasl2-modules-db openssl procps; do
+  chroot "${dir}" apt-get --assume-yes --purge remove "${p}" || \
+    echo "${p} not installed or not removable, skipping."
 done
 
-chroot "$dir" apt-get --assume-yes clean
-chroot "$dir" apt-get --assume-yes autoclean
-chroot "$dir" apt-get --assume-yes autoremove
+chroot "${dir}" apt-get --assume-yes clean
+chroot "${dir}" apt-get --assume-yes autoclean
+chroot "${dir}" apt-get --assume-yes autoremove
 
-grep -v -e '_apt' -e 'root' -e 'nobody' -e 'systemd' "$dir/etc/passwd" | awk -F ':' '{print $1}' | \
- while IFS= read -r userlist; do
-  chroot "$dir" userdel -r "$userlist"
+awk -F':' '$1 !~ /^(_apt|root|nobody|systemd.*|sync|daemon|bin|sys)$/ {print $1}' \
+  "${dir}/etc/passwd" | while IFS= read -r username; do
+  chroot "${dir}" userdel -r "${username}" 2> /dev/null || \
+    echo "Could not remove user ${username}, skipping."
 done
 
-chroot "$dir" usermod -L root
+chroot "${dir}" usermod -L root
 
 rm -rf "${dir:?}/dev" "${dir:?}/proc"
-mkdir -p "$dir/dev" "$dir/proc"
+mkdir -p "${dir}/dev" "${dir}/proc"
 
-rm -rf "$dir/var/lib/apt/lists/*" "$dir/var/lib/dpkg/info/*"
-rm -rf "$dir/usr/share/doc" "$dir/usr/share/doc-base" \
-  "$dir/usr/share/man" "$dir/usr/share/locale" "$dir/usr/share/zoneinfo"
+# The globs below have to stay unquoted; quoting them, as earlier revisions did,
+# made rm look for a directory literally named "*".
+rm -rf "${dir:?}"/var/lib/apt/lists/* "${dir:?}"/var/cache/apt/archives/*.deb
+rm -rf "${dir:?}/usr/share/doc" "${dir:?}/usr/share/doc-base" \
+  "${dir:?}/usr/share/man" "${dir:?}/usr/share/locale" "${dir:?}/usr/share/zoneinfo"
 
-find "$dir" -user root -perm -2000 -exec chmod -s {} \;
-find "$dir" -user root -perm -4000 -exec chmod -s {} \;
-
-echo ".git" > .dockerignore
-
-if ls -1 ./*.txz 2>/dev/null; then
-  for t in ./*.txz; do
-    echo "$t" >> .dockerignore
-  done
-fi
+find "${dir}" -user root -perm -2000 -exec chmod -s {} \;
+find "${dir}" -user root -perm -4000 -exec chmod -s {} \;
 
 date="$(date -u +%y%m%d%H%M)"
+tarball="${release}-${date}.txz"
 
-export XZ_OPT=-9e
-LC_ALL=C tar --numeric-owner -cJf "$release-$date.txz" -C "$dir" --transform='s,^./,,' .
-SHA256="$(openssl sha1 -sha256 "$release-$date.txz" | awk '{print $NF}')"
+# Previously generated tarballs are kept out of the build context, but not the
+# one this run is about to write: a second build of the same release in the
+# same UTC minute would otherwise find the existing file, ignore it, and the
+# generated "ADD ./${tarball} /" would have nothing to add.
+{
+  echo '.git'
+  for t in ./*.txz; do
+    [ -e "${t}" ] || continue
+    if [ "${t}" != "./${tarball}" ]; then
+      echo "${t}"
+    fi
+  done
+} > .dockerignore
 
-dockerfile="
+XZ_OPT=-9e
+export XZ_OPT
+LC_ALL=C tar --numeric-owner -cJf "${tarball}" -C "${dir}" --transform='s,^./,,' .
+
+# openssl sha1 -sha256 mixed two digests; sha256sum is unambiguous.
+sha256="$(sha256sum "${tarball}" | awk '{print $1}')"
+
+cat > "Dockerfile.${release}" <<DOCKERFILE
 FROM scratch
-LABEL maintainer='Thomas Sjögren <konstruktoid@users.noreply.github.com>'
-ADD ./$release-$date.txz /
-ENV SHA256 $SHA256
+
+LABEL org.opencontainers.image.title="${release}" \\
+      org.opencontainers.image.description="Minimal ${release} base image built with debootstrap" \\
+      org.opencontainers.image.authors="Thomas Sjögren <konstruktoid@users.noreply.github.com>" \\
+      org.opencontainers.image.version="${date}"
+
+ADD ./${tarball} /
+
+ENV SHA256=${sha256}
 
 ARG TERM=linux
 ARG DEBIAN_FRONTEND=noninteractive
 
-ONBUILD RUN apt-get update && sh -c 'yes | apt-get --assume-yes upgrade'
-"
+ONBUILD RUN apt-get update && apt-get --assume-yes upgrade
+DOCKERFILE
 
-printf '%s\n' "$dockerfile" | sed 's/^ //g' > ./Dockerfile."$release"
+# Named after the release rather than README.md: the output directory is often
+# a checkout of this repository, and a plain README.md would overwrite its own
+# documentation.
+readme="README.${release}.md"
 
-echo "# $release Docker image" > README.md
 {
+  echo "# ${release} Docker image"
   echo
-  echo "* FILE: $release-$date.txz"
-  echo "* SIZE: $(du -h "$release"-"$date".txz | awk '{print $1}')"
-  echo "* SHA256: $SHA256"
-} >> README.md
+  echo "* FILE: ${tarball}"
+  echo "* SIZE: $(du -h "${tarball}" | awk '{print $1}')"
+  echo "* SHA256: ${sha256}"
+} > "${readme}"
 
-rm -rf "$dir"
+rm -rf "${dir:?}"
+
+echo "Wrote ${tarball}, Dockerfile.${release} and ${readme} to ${cwd}."

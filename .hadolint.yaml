@@ -1,0 +1,8 @@
+---
+# Nothing below "warning" fails a build. DL3066 (non-numeric user-id) stays
+# informational: the runtime accounts are created by the distribution packages
+# inside the image, so they are referenced by name on purpose.
+#
+# Package pinning (DL3008, DL3018) is ignored per instruction in the Dockerfile
+# rather than globally, so a new unpinned install elsewhere is still reported.
+failure-threshold: warning
